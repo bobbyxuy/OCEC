@@ -1,80 +1,102 @@
 # OCEC - Open Closed Eye Classifier
 
-近红外(NIR)眼睛图像分类与数据增强工具集。
+NIR eye image classification and glare data augmentation toolkit.
 
-## 功能
+---
 
-### NIR Eye Image Glare Generator
+## Quick Start — Which files do you need?
 
-在近红外眼睛图像上生成逼真的镜片反光/光斑效果，用于数据增强，提升模型对戴眼镜场景的鲁棒性。
-
-**支持三种模式：**
-
-- `glint` — 椭圆高斯光斑 + 矩形柔边光块 + bloom（默认，推荐）
-- `env_blend` — 模糊环境纹理叠加 + glint（需提供环境纹理）
-- `mixed` — 随机混合以上两种
-
-### 快速开始
+### Task 1: Synthesize glare (overexposed / washed-out effect)
 
 ```bash
-# 安装依赖
-pip install pillow numpy
-
-# 基本用法 - 处理整个目录
-python nir_eye_glare.py --input_dir ./eyes/ --output_dir ./eyes_glare/
-
-# 每张图生成3个变体
-python nir_eye_glare.py --input_dir ./eyes/ --output_dir ./eyes_glare/ --num 3
-
-# 处理单张图片
-python nir_eye_glare.py --input eye.png --output eye_glare.png
-
-# 自定义强度
-python nir_eye_glare.py --input_dir ./eyes/ --output_dir ./eyes_glare/ --intensity 0.8
-
-# 使用环境纹理叠加模式
-python nir_eye_glare.py --input_dir ./eyes/ --output_dir ./eyes_glare/ --mode env_blend --env_dir ./env_textures/
+python make_comparison_grid.py        # visualize: left=clean, right=synthesized
 ```
 
-### 参数说明
+Edit the three parameters in `make_comparison_grid.py` to tune the effect:
 
-| 参数 | 说明 | 默认值 |
-|------|------|--------|
-| `--input` | 单张输入图片路径 | - |
-| `--input_dir` | 输入图片目录 | - |
-| `--output` | 单张输出路径 | - |
-| `--output_dir` | 输出目录 | - |
-| `--num` | 每张图的变体数量 | 1 |
-| `--intensity` | 光斑强度 0-1 | 随机 0.5-1.0 |
-| `--mode` | 生成模式: glint / env_blend / mixed | glint |
-| `--env_dir` | 环境纹理目录 | ./env_textures |
-| `--seed` | 随机种子 | None |
+```python
+blur_sigma = np.random.uniform(1.5, 3.5)   # blur amount (larger = more blurry)
+factor     = np.random.uniform(0.65, 0.88) # contrast retention (1.0=none, 0.3=heavy)
+lift       = np.random.uniform(8, 30)      # brightness lift in pixel values
+```
 
-## 效果说明
+Output saved to `output/glare_comparison.png`.
 
-- **glint（默认）**: 模拟 IR LED 在镜片上的高光反射，包含椭圆光斑和矩形屏幕反射
-- **env_blend**: 在 glint 基础上叠加模糊环境纹理，模拟车内环境反射
+### Task 2: Synthesize glasses reflection (LED spot / streak)
 
-## DINOv2 眼睛睁闭分类器
+```bash
+python nir_glare_generator.py --input_dir ./eyes/ --output_dir ./eyes_glare/ --mode mixed
+```
 
-基于 DINOv2-ViT-Large 微调的二分类模型（睁眼/闭眼），在 MRL Eye Dataset 上达到 F1 > 0.99。
+Modes: `led_spot`, `led_streak`, `ambient`, `mixed`
+
+### Task 3: Validate synthesis quality against real glare
+
+```bash
+python test_flare_synthesis.py
+```
+
+Outputs stats table, histogram comparison, and t-SNE plot to `output/`.
+
+---
+
+## File Overview
+
+### Core files (use these)
+
+| File | Purpose |
+|------|---------|
+| `make_comparison_grid.py` | Visual comparison grid: clean vs synthesized haze/overexposure |
+| `nir_glare_generator.py` | LED reflection synthesis (spot / streak / ambient) |
+| `nir_eye_glare.py` | Gaussian glint + env texture blending |
+| `test_flare_synthesis.py` | Validation: stats + histogram + t-SNE vs real glare |
+
+### Reference data
+
+| Directory | Contents |
+|-----------|---------|
+| `glass1_samples/` | 16 real NIR eye images (512×512) used as synthesis reference |
+| `glare_demo/` | Synthesized examples for each mode (led_spot / led_streak / ambient / mixed) |
+| `env_reflection_textures/` | Environment textures for `env_blend` mode |
+
+### Other scripts (experimental / archived)
+
+| File | Notes |
+|------|-------|
+| `nir_reflection_v2~v4_demo.py` | Progressive iterations of reflection compositing |
+| `composite_v4.py` | Blender-render based compositing (requires Blender pass renders) |
+| `procedural_reflection.py` | Procedural reflection without env textures |
+| `eval_*.py` | Model evaluation scripts |
+| `blender_*.py` | Blender-based render scripts |
+
+---
+
+## Synthesis Notes
+
+The MRL Eye Dataset filename encodes glare level at position `[5]`:
+- `flag=0`: clean, max pixel ~120, no overexposure
+- `flag=1`: mild glare, occlusion effect (darker), 8% pixels < 30
+- `flag=2`: heavy glare, mean +53, 7% pixels > 240
+
+The haze/overexposure synthesis in `make_comparison_grid.py` targets `flag=2` characteristics.
+
+---
+
+## Eye Open/Closed Classifier
+
+DINOv2-ViT-Large fine-tuned binary classifier (open/closed), F1 > 0.99 on MRL Eye Dataset.
 
 ```bash
 python train_dinov2.py
 ```
 
-## 数据集
+Dataset: [MRL Eye Dataset](http://mrl.cs.vsb.cz/eyedataset) — 84,898 IR eye images, 37 subjects.
 
-使用 [MRL Eye Dataset](http://mrl.cs.vsb.cz/eyedataset) — 84,898 张红外眼图，37 个被试者。
+## Dependencies
 
-## 依赖
-
-- Python >= 3.8
-- PyTorch
-- timm (DINOv2 backbone)
-- Pillow
-- numpy
-- scikit-learn
+```
+pip install pillow numpy opencv-python scikit-image scikit-learn matplotlib
+```
 
 ## License
 
