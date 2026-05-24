@@ -1,0 +1,30 @@
+Device: cuda
+Loading DINOv2-ViT-Large backbone...
+Total: 303.0M, Trainable: 0.0M
+Train: 50937, Val: 16980, Test: 16981
+E 1 loss=0.4218 val_acc=0.8958 val_f1=0.8942 best=0.8942 (15s)
+E 2 loss=0.2713 val_acc=0.9154 val_f1=0.9146 best=0.9146 (14s)
+E 3 loss=0.2341 val_acc=0.9224 val_f1=0.9216 best=0.9216 (17s)
+E 4 loss=0.2132 val_acc=0.9265 val_f1=0.9256 best=0.9256 (15s)
+E 5 loss=0.2019 val_acc=0.9292 val_f1=0.9279 best=0.9279 (15s)
+E5: Unfroze backbone. Trainable: 303.0M
+E 6 loss=0.0701 val_acc=0.9885 val_f1=0.9883 best=0.9883 (49s)
+E 7 loss=0.0362 val_acc=0.9896 val_f1=0.9895 best=0.9895 (48s)
+E 8 loss=0.0296 val_acc=0.9893 val_f1=0.9892 best=0.9895 (46s)
+E 9 loss=0.0243 val_acc=0.9902 val_f1=0.9900 best=0.9900 (49s)
+E10 loss=0.0235 val_acc=0.9908 val_f1=0.9907 best=0.9907 (48s)
+E11 loss=0.0188 val_acc=0.9919 val_f1=0.9918 best=0.9918 (47s)
+E12 loss=0.0183 val_acc=0.9913 val_f1=0.9912 best=0.9918 (47s)
+E13 loss=0.0157 val_acc=0.9903 val_f1=0.9902 best=0.9918 (49s)
+E14 loss=0.0128 val_acc=0.9908 val_f1=0.9907 best=0.9918 (46s)
+E15 loss=0.0112 val_acc=0.9908 val_f1=0.9907 best=0.9918 (48s)
+E16 loss=0.0093 val_acc=0.9910 val_f1=0.9909 best=0.9918 (48s)
+E17 loss=0.0076 val_acc=0.9911 val_f1=0.9910 best=0.9918 (46s)
+E18 loss=0.0067 val_acc=0.9916 val_f1=0.9915 best=0.9918 (49s)
+E19 loss=0.0058 val_acc=0.9915 val_f1=0.9913 best=0.9918 (49s)
+E20 loss=0.0052 val_acc=0.9913 val_f1=0.9912 best=0.9918 (47s)
+/home/bobby/facefusion-env/lib/python3.10/site-packages/torch/__init__.py:2132: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+  assert condition, message
+-rw-rw-r-- 1 bobby bobby 1.2G Apr  9 01:14 dinov2_eye_classifier.onnx
+
+=== TEST === Acc=0.9924 F1=0.9923 CM=[[8541, 50], [79, 8311]]

@@ -12,3 +12,30 @@ runs/
 *.profile
 *.mp4
 *.tar.gz
+# generated outputs
+output/
+blender_out*/
+env_photo_out/
+procedural_out/
+refl_demo/
+refl_env_demo/
+refl_env_demo2/
+refl_heavy_demo/
+stretch_test/
+infer_test/
+misclassified/
+nir-glass-reflection/
+
+# loose generated images and logs
+*_grid.png
+blender_*.log
+blender_render*.log
+demo_[0-9]_*.png
+demo_v3_*.png
+env_photo_grid.png
+procedural_grid.png
+reflection_*.png
+stretch_grid.png
+comp_v4_grid.png
+composite_grid.png
+demo_grid*.png
